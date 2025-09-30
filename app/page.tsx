@@ -3,8 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Link from 'next/link';
-import type { PageProps } from "next";
-
+import type { PageProps } from "next/dist/server/app-render/types";
 // === Invidious Instance List ===
 // An array of Invidious instance URLs for fallback in case one fails.
 const invidiousInstances = [
