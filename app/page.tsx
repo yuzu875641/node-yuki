@@ -77,7 +77,7 @@ export default function Home({ searchParams }: PageProps) {
 
   // ---
 
-  ### UI Rendering Logic
+### UI Rendering Logic
 
   const renderContent = () => {
     if (loading) return <div style={{ textAlign: 'center', marginTop: '20px' }}>ローディング中...</div>;
