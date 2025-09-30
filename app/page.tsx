@@ -75,9 +75,7 @@ export default function Home({ searchParams }: PageProps) {
     fetchData();
   }, [searchParams]);
 
-  // ---
 
-### UI Rendering Logic
 
   const renderContent = () => {
     if (loading) return <div style={{ textAlign: 'center', marginTop: '20px' }}>ローディング中...</div>;
