@@ -102,12 +102,7 @@ app.get('/search', async (req, res) => {
     }
     resultsHtml += `</div>`;
     
-    const htmlContent = createHtml(resultsHtml, `
-        document.getElementById('search-button').addEventListener('click', () => {
-            const query = document.getElementById('search-query').value;
-            window.location.href = \`/search?q=\${encodeURIComponent(query)}\`;
-        });
-    `);
+    const htmlContent = createHtml(resultsHtml);
     res.send(htmlContent);
   } catch (error) {
     console.error('検索中にエラーが発生しました:', error);
