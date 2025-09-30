@@ -3,8 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Link from 'next/link';
+import type { PageProps } from "next";
 
-// === Invidious インスタンスリスト ===
+// === Invidious Instance List ===
+// An array of Invidious instance URLs for fallback in case one fails.
 const invidiousInstances = [
   'https://invidious.reallyaweso.me',
   'https://iv.melmac.space',
@@ -14,7 +16,8 @@ const invidiousInstances = [
   'https://yt.omada.cafe'
 ];
 
-// === API通信関数 (フォールバック機構付き) ===
+// === API Fetch Function with Fallback ===
+// This function attempts to fetch data from each Invidious instance until a successful response is received.
 async function fetchInvidiousData(path: string, params: URLSearchParams): Promise<any> {
   const query = params.toString();
   for (const instance of invidiousInstances) {
@@ -28,8 +31,9 @@ async function fetchInvidiousData(path: string, params: URLSearchParams): Promis
   throw new Error('すべてのInvidiousインスタンスで情報を取得できませんでした。');
 }
 
-// === メインコンポーネント ===
-export default function Home({ searchParams }: { searchParams: { q?: string; v?: string; list?: string; channelid?: string } }) {
+// === Main Component ===
+// This is the core component that renders the appropriate UI based on the URL query.
+export default function Home({ searchParams }: PageProps) {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -40,20 +44,27 @@ export default function Home({ searchParams }: { searchParams: { q?: string; v?:
       try {
         setLoading(true);
         setError(null);
-        if (searchParams.v) {
-          const videoData = await fetchInvidiousData(`/videos/${searchParams.v}`, new URLSearchParams());
+        
+        // Safely access search parameters
+        const q = searchParams?.q as string;
+        const v = searchParams?.v as string;
+        const list = searchParams?.list as string;
+        const channelid = searchParams?.channelid as string;
+        
+        if (v) {
+          const videoData = await fetchInvidiousData(`/videos/${v}`, new URLSearchParams());
           setData(videoData);
-        } else if (searchParams.q) {
-          const searchData = await fetchInvidiousData('/search', new URLSearchParams({ q: searchParams.q }));
+        } else if (q) {
+          const searchData = await fetchInvidiousData('/search', new URLSearchParams({ q }));
           setData(searchData);
-        } else if (searchParams.channelid) {
-          const channelData = await fetchInvidiousData(`/channels/${searchParams.channelid}`, new URLSearchParams());
+        } else if (channelid) {
+          const channelData = await fetchInvidiousData(`/channels/${channelid}`, new URLSearchParams());
           setData(channelData);
-        } else if (searchParams.list) {
-          const playlistData = await fetchInvidiousData(`/playlists/${searchParams.list}`, new URLSearchParams());
+        } else if (list) {
+          const playlistData = await fetchInvidiousData(`/playlists/${list}`, new URLSearchParams());
           setData(playlistData);
         } else {
-          // トップページ表示用: 例として検索フォームを表示
+          // No specific query, render the homepage content.
         }
       } catch (err: any) {
         setError(err.message);
@@ -64,10 +75,15 @@ export default function Home({ searchParams }: { searchParams: { q?: string; v?:
     fetchData();
   }, [searchParams]);
 
+  // ---
+
+  ### UI Rendering Logic
+
   const renderContent = () => {
     if (loading) return <div style={{ textAlign: 'center', marginTop: '20px' }}>ローディング中...</div>;
     if (error) return <div style={{ textAlign: 'center', marginTop: '20px', color: 'red' }}>エラー: {error}</div>;
 
+    // Video Player Page
     if (searchParams.v && data) {
       const video = data;
       const thumbnailUrl = video?.authorThumbnails?.find((thumb: any) => thumb.width === 100 && thumb.height === 100)?.url;
@@ -97,6 +113,7 @@ export default function Home({ searchParams }: { searchParams: { q?: string; v?:
       );
     }
 
+    // Search Results Page
     if (searchParams.q && data) {
       return (
         <div style={{ padding: '20px' }}>
@@ -118,7 +135,7 @@ export default function Home({ searchParams }: { searchParams: { q?: string; v?:
       );
     }
     
-    // トップページと検索フォーム
+    // Homepage with Search Form
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', gap: '20px' }}>
         <h1 style={{ fontSize: '4em' }}>Yozutube</h1>
@@ -162,4 +179,4 @@ export default function Home({ searchParams }: { searchParams: { q?: string; v?:
       </main>
     </div>
   );
-    }
+}
